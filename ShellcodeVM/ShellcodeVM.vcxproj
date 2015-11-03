@@ -75,7 +75,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4005;4477</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -140,7 +140,8 @@
     <ClInclude Include="VM.h" />
     <ClInclude Include="VMCS.h" />
     <ClInclude Include="VM\page_frame.h" />
-    <ClInclude Include="VM\paging" />
+    <ClInclude Include="VM\paging.h" />
+    <ClInclude Include="WinMiniDump.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="hax-windows.c" />
@@ -153,12 +154,19 @@
     <ClCompile Include="VM.cpp" />
     <ClCompile Include="VM\page_frame.cpp" />
     <ClCompile Include="VM\paging.cpp" />
+    <ClCompile Include="WinMiniDump.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="boot.asm">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\nasm\nasm.exe -f win32 ./boot.asm -o $(Configuration)\boot.obj</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">./Debug/boot.obj</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\boot.obj</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\nasm\nasm.exe -f win32 boot.asm -o $(Platform)\$(Configuration)\boot.obj</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\boot.obj</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\nasm\nasm.exe -f win32 boot.asm -o $(Platform)\$(Configuration)\boot.obj</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\boot.obj</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\nasm\nasm.exe -f win32 ./boot.asm -o $(Configuration)\boot.obj</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\boot.obj</Outputs>
     </CustomBuild>
     <None Include="MiniDump.dmp" />
   </ItemGroup>

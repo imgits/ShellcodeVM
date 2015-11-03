@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "WinMiniDump.h"
 
 extern "C" void boot_code_start();
 extern "C" void boot_code_end();
@@ -88,23 +89,16 @@ void TestDOS(hax_state *State, hax_vcpu_state *Cpu)
 		__debugbreak();
 }
 
-#include <DbgHelp.h>
-#pragma comment(lib,"DbgHelp.lib")
 
 void dump_vcpu_state(hax_vcpu_state *CPU);
 int main(int argc, char *argv[])
 {
-	//// 创建一个Dump文件
-	//HANDLE hFile = CreateFile("MiniDump.dmp", GENERIC_READ | GENERIC_WRITE,
-	//	0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	WinMiniDump MiniDump;
+	//MiniDump.Create("MiniDump.Dmp");
+	MiniDump.Open("MiniDump.Dmp");
+	MiniDump.DumpHeader();
+	MiniDump.DumpDirectory();
 
-	//BOOL ret = MiniDumpWriteDump(
-	//	GetCurrentProcess(),
-	//	GetCurrentProcessId(), 
-	//	hFile, 
-	//	MiniDumpWithFullMemory, 
-	//	NULL, NULL, NULL);
-	//return 0;
 	// Is everything loaded and compatible?
 	if (!VM_HaxEnabled())
 		return 1;

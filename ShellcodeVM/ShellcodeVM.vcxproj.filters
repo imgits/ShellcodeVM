@@ -54,7 +54,10 @@
     <ClInclude Include="VM\page_frame.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="VM\paging">
+    <ClInclude Include="VM\paging.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WinMiniDump.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -87,6 +90,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="VM\paging.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMiniDump.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
