@@ -26,6 +26,7 @@ public:
 	bool DumpHeader();
 	bool DumpDirectory();
 	bool DumpThreadList(PMINIDUMP_DIRECTORY dir);
+	bool DumpModuleList(PMINIDUMP_DIRECTORY dir);
 	bool DumpMemoryList(PMINIDUMP_DIRECTORY dir);
 	bool DumpMemory64List(PMINIDUMP_DIRECTORY dir);
 	bool DumpMemoryInfoList(PMINIDUMP_DIRECTORY dir);

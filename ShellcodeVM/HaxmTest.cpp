@@ -89,12 +89,24 @@ void TestDOS(hax_state *State, hax_vcpu_state *Cpu)
 		__debugbreak();
 }
 
-
 void dump_vcpu_state(hax_vcpu_state *CPU);
-int main(int argc, char *argv[])
+int main1(int argc, char *argv[])
 {
 	WinMiniDump MiniDump;
-	//MiniDump.Create("MiniDump.Dmp");
+	MiniDump.Create("MiniDump.Dmp", NULL,0,
+		(MINIDUMP_TYPE)(
+		//(UINT32)MiniDumpWithDataSegs
+			//| (UINT32)MiniDumpWithCodeSegs 
+			//| 
+			//(UINT32)MiniDumpWithFullMemory
+		    //| (UINT32)MiniDumpWithFullMemoryInfo
+			(UINT32)MiniDumpWithFullMemory |
+			(UINT32)MiniDumpWithFullMemoryInfo |
+			(UINT32)MiniDumpWithHandleData |
+			(UINT32)MiniDumpWithThreadInfo |
+			(UINT32)MiniDumpWithUnloadedModules
+			)
+		);
 	MiniDump.Open("MiniDump.Dmp");
 	MiniDump.DumpHeader();
 	MiniDump.DumpDirectory();

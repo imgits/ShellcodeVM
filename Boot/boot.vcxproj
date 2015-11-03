@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C27C6721-3007-443E-B095-51024C1B8236}</ProjectGuid>
-    <RootNamespace>ShellcodeVM</RootNamespace>
+    <ProjectGuid>{77EB0E19-AA23-415C-B34B-8BDCD4CD495D}</ProjectGuid>
+    <RootNamespace>GuestOS</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -68,18 +68,31 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4005;4477</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>vm</AdditionalIncludeDirectories>
+      <ExceptionHandling>false</ExceptionHandling>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <MinimalRebuild>false</MinimalRebuild>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Native</SubSystem>
+      <EntryPointSymbol>boot_code_start</EntryPointSymbol>
+      <BaseAddress>0x800000000</BaseAddress>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <Driver>Driver</Driver>
+      <AdditionalDependencies />
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -87,8 +100,6 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -101,14 +112,22 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>vm;</AdditionalIncludeDirectories>
+      <ExceptionHandling>false</ExceptionHandling>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies />
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <EntryPointSymbol>main</EntryPointSymbol>
+      <BaseAddress>0x10000</BaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <SubSystem>Native</SubSystem>
+      <Driver>Driver</Driver>
+      <AdditionalOptions> /filealign:0x1000 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -118,9 +137,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>vm;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -129,49 +145,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="config.h" />
-    <ClInclude Include="hax-all.h" />
-    <ClInclude Include="hax-i386.h" />
-    <ClInclude Include="hax-interface.h" />
-    <ClInclude Include="hax-windows.h" />
-    <ClInclude Include="HaxVM.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="vcpu.h" />
-    <ClInclude Include="VirtualContext.h" />
-    <ClInclude Include="VirtualCPU.h" />
-    <ClInclude Include="VM.h" />
-    <ClInclude Include="VMCS.h" />
-    <ClInclude Include="VM\page_frame.h" />
-    <ClInclude Include="VM\paging.h" />
-    <ClInclude Include="WinMiniDump.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="hax-windows.c" />
-    <ClCompile Include="HaxmTest.cpp" />
-    <ClCompile Include="HaxVM.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="VirtualContext.cpp" />
-    <ClCompile Include="VirtualCPU.cpp" />
-    <ClCompile Include="VirtualIO.cpp" />
-    <ClCompile Include="VM.cpp" />
-    <ClCompile Include="VM\page_frame.cpp" />
-    <ClCompile Include="VM\paging.cpp" />
-    <ClCompile Include="WinMiniDump.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <CustomBuild Include="boot.asm">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\nasm\nasm.exe -f win32 ./boot.asm -o $(Configuration)\boot.obj</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\boot.obj</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\nasm\nasm.exe -f win32 boot.asm -o $(Platform)\$(Configuration)\boot.obj</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\boot.obj</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\nasm\nasm.exe -f win32 boot.asm -o $(Platform)\$(Configuration)\boot.obj</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\boot.obj</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\nasm\nasm.exe -f win32 ./boot.asm -o $(Configuration)\boot.obj</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\boot.obj</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\nasm\nasm.exe -f win64 ./boot.asm -o $(Configuration)\boot.obj</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)\boot.obj</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\boot.obj</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\nasm\nasm.exe -f win64 ./boot.asm -o $(Configuration)\boot.obj</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\boot.bin</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\nasm\nasm.exe -f bin ./boot.asm -o $(Configuration)\boot.bin</Command>
     </CustomBuild>
-    <None Include="MiniDump.dmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="gdt.cpp" />
+    <ClCompile Include="idt.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="paging.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="gdt.h" />
+    <ClInclude Include="idt.h" />
+    <ClInclude Include="paging.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

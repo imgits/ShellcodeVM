@@ -24,7 +24,7 @@ bool		page_frame_database::Init(pager*  pager, uint64_t mem_size)
 {
 	m_pager = pager;
 	m_mem_size = mem_size;
-	m_page_frame_min = 0;
+	m_page_frame_min = SIZE_TO_PAGES(MB(4));
 	m_page_frame_max = SIZE_TO_PAGES(mem_size);
 	m_next_free_page_frame = 0;
 	m_page_frame_map = new uint8_t(m_page_frame_max);
@@ -67,7 +67,7 @@ uint64_t	page_frame_database::alloc_physical_pages(uint64_t pages)
 	return 0;
 }
 
-void		page_frame_database::free_physical_page(uint64_t page)
+void	page_frame_database::free_physical_page(uint64_t page)
 {
 	m_page_frame_map[page] = PAGE_FRAME_FREE;
 	if (page < m_next_free_page_frame)
@@ -76,7 +76,7 @@ void		page_frame_database::free_physical_page(uint64_t page)
 	}
 }
 
-void		page_frame_database::free_physical_pages(uint64_t  start_page, uint64_t pages)
+void	page_frame_database::free_physical_pages(uint64_t  start_page, uint64_t pages)
 {
 	for (uint64_t i = start_page; i < start_page + pages; i++)
 	{

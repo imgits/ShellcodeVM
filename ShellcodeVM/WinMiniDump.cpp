@@ -38,7 +38,7 @@ bool WinMiniDump::Create(char* Filename, HANDLE hProcess, DWORD ProcessId, MINID
 		0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (m_hFile == INVALID_HANDLE_VALUE)
 	{
-		ShowError("WinMiniDump::Create");
+		ShowError("WinMiniDump::Create::CreateFile");
 		return false;
 	}
 
@@ -48,6 +48,11 @@ bool WinMiniDump::Create(char* Filename, HANDLE hProcess, DWORD ProcessId, MINID
 		m_hFile, 
 		m_DumpType,
 		NULL, NULL, NULL);
+	if (!ret)
+	{
+		ShowError("WinMiniDump::Create::MiniDumpWriteDump");
+		return false;
+	}
 	return true;
 }
 
@@ -99,7 +104,7 @@ void WinMiniDump::ShowError(char* Note, DWORD Error)
 {
 	LPVOID lpvMessageBuffer;
 	if (Note == NULL) Note = "WinMiniDump Error";
-	if (Error == 0) GetLastError();
+	if (Error == 0) Error = GetLastError();
 
 	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		FORMAT_MESSAGE_FROM_SYSTEM |
@@ -108,7 +113,7 @@ void WinMiniDump::ShowError(char* Note, DWORD Error)
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR)&lpvMessageBuffer, 0, NULL);
 
-	printf("%s:%d", Note, lpvMessageBuffer);
+	printf("%s:%s\n", Note, lpvMessageBuffer);
 	// Free the buffer allocated by the system
 	LocalFree(lpvMessageBuffer);
 }
@@ -176,7 +181,7 @@ bool WinMiniDump::DumpDirectory()
 			break;
 		case ModuleListStream:
 			DUMP_STREAM_TYPE(ModuleListStream);
-			//DumpModuleList(dir);
+			DumpModuleList(dir);
 			break;
 		case MemoryListStream:
 			DUMP_STREAM_TYPE(MemoryListStream);
@@ -215,6 +220,7 @@ bool WinMiniDump::DumpDirectory()
 			break;
 		case MemoryInfoListStream:
 			DUMP_STREAM_TYPE(MemoryInfoListStream);
+			DumpMemoryInfoList(dir);
 			break;
 		case ThreadInfoListStream:
 			DUMP_STREAM_TYPE(ThreadInfoListStream);
@@ -247,18 +253,33 @@ bool WinMiniDump::DumpThreadList(PMINIDUMP_DIRECTORY dir)
 	return true;
 }
 
+bool WinMiniDump::DumpModuleList(PMINIDUMP_DIRECTORY dir)
+{
+	PMINIDUMP_MODULE_LIST ModuleList = (PMINIDUMP_MODULE_LIST)(m_MapBuf + dir->Location.Rva);
+	PMINIDUMP_MODULE module = ModuleList->Modules;
+	for (int i = 0; i < ModuleList->NumberOfModules; i++, module++)
+	{
+		PMINIDUMP_STRING pname = (PMINIDUMP_STRING)(m_MapBuf + module->ModuleNameRva);
+		printf("Module %08X %08X %ws\n", (UINT32)module->BaseOfImage, module->SizeOfImage, pname->Buffer);
+	}
+	return true;
+}
+
 bool WinMiniDump::DumpMemoryList(PMINIDUMP_DIRECTORY dir)
 {
 	PMINIDUMP_MEMORY_LIST MemList = (PMINIDUMP_MEMORY_LIST)(m_MapBuf + dir->Location.Rva);
 	PMINIDUMP_MEMORY_DESCRIPTOR mem_desc = MemList->MemoryRanges;
+	UINT64  mem_size = 0;
 	for (int i = 0; i < MemList->NumberOfMemoryRanges; i++, mem_desc++)
 	{
 		MINIDUMP_LOCATION_DESCRIPTOR* memory = &mem_desc->Memory;
 		UINT32 start = mem_desc->StartOfMemoryRange;
 		UINT32 size = memory->DataSize;
 		UINT32 end   = start + size;
-		printf("%08X-%08X %08X\n", start, end, size);
+		printf("%4d %08X-%08X %08X\n", i, start, end, size);
+		mem_size += size;
 	}
+	printf("mem_size=%08X\n", mem_size);
 	return true;
 }
 
@@ -266,13 +287,16 @@ bool WinMiniDump::DumpMemory64List(PMINIDUMP_DIRECTORY dir)
 {
 	PMINIDUMP_MEMORY64_LIST Mem64List = (PMINIDUMP_MEMORY64_LIST)(m_MapBuf + dir->Location.Rva);
 	PMINIDUMP_MEMORY_DESCRIPTOR64 mem_desc = Mem64List->MemoryRanges;
+	UINT64  mem_size = 0;
 	for (int i = 0; i < Mem64List->NumberOfMemoryRanges; i++, mem_desc++)
 	{
 		UINT64 start = mem_desc->StartOfMemoryRange;
 		UINT64 size = mem_desc->DataSize;
 		UINT64 end = start + size;
-		printf("%016llX-%016llX %016llX\n", start, end, size);
+		printf("%4d %016llX-%016llX %016llX\n", i, start, end, size);
+		mem_size += size;
 	}
+	printf("mem_size=%08X(%dMB)\n", (UINT32)mem_size, (UINT32)(mem_size>>20));
 	return true;
 }
 
@@ -280,9 +304,19 @@ bool WinMiniDump::DumpMemoryInfoList(PMINIDUMP_DIRECTORY dir)
 {
 	PMINIDUMP_MEMORY_INFO_LIST mem_list = (PMINIDUMP_MEMORY_INFO_LIST)(m_MapBuf + dir->Location.Rva);
 	PMINIDUMP_MEMORY_INFO mem_info = (PMINIDUMP_MEMORY_INFO)(mem_list + 1);
-	for (int i = 0; i < mem_list->NumberOfEntries; i++)
+	UINT64  mem_size = 0;
+	int count = 0;
+	for (int i = 0; i < mem_list->NumberOfEntries; i++, mem_info++)
 	{
-
+		if (!(mem_info->State & MEM_COMMIT)) continue;
+		printf("%4d %08X-%08X %08X %08X %08X\n", count++,
+			(UINT32)mem_info->BaseAddress,
+			(UINT32)(mem_info->BaseAddress + mem_info->RegionSize),
+			(UINT32)mem_info->RegionSize,
+			(UINT32)mem_info->Type,
+			(UINT32)mem_info->Protect);
+		mem_size += mem_info->RegionSize;
 	}
+	printf("mem_size=%08X(%dMB)\n", (UINT32)mem_size, (UINT32)(mem_size >> 20));
 	return true;
 }
