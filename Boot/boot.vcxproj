@@ -84,16 +84,16 @@
       <MinimalRebuild>false</MinimalRebuild>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <AdditionalIncludeDirectories>E:\GitHub\ShellcodeOS\libc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ShellcodeOS\libc;..\GuestOS;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Native</SubSystem>
       <EntryPointSymbol>boot_code16</EntryPointSymbol>
-      <BaseAddress>0x10000</BaseAddress>
+      <BaseAddress>0x00000000</BaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <Driver>Driver</Driver>
-      <AdditionalDependencies>E:\GitHub\ShellcodeOS\Debug\oslibc.lib;</AdditionalDependencies>
+      <AdditionalDependencies>..\..\ShellcodeOS\Debug\oslibc.lib;</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <AdditionalOptions> /filealign:0x1000 %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -171,7 +171,6 @@
   <ItemGroup>
     <ClInclude Include="gdt.h" />
     <ClInclude Include="idt.h" />
-    <ClInclude Include="os.h" />
     <ClInclude Include="paging.h" />
     <ClInclude Include="video.h" />
   </ItemGroup>

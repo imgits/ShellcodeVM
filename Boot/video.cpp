@@ -1,4 +1,5 @@
 #include "VIDEO.h"
+#include <string.h>
 
 VIDEO::VIDEO()
 {
@@ -38,37 +39,53 @@ void VIDEO::putc(char ch)
 		else scroll(1);
 		return;
 	}
-	if (m_screen_width < m_screen_width)
-
+	if (m_cursor_x >= m_screen_width) 
+	{
+		m_cursor_x = 0;
+		if (m_cursor_y < m_screen_height) m_cursor_y++;
+		else scroll(1);
+	}
+	char* addr = (char*)(m_video_buf + m_cursor_y*LINE_BUF_WIDTH + m_cursor_x);
+	*addr++ = ch;
+	*addr = 0;
 }
 
 void VIDEO::puts(char* str)
 {
-
+	int len = strlen(str);
+	for (int i = 0; i < len; i++) putc(str[i]);
 }
+
 
 void VIDEO::clear()
 {
-
+	char* line_buf = (char*)m_video_buf;
+	for (int i = 0; i <= m_screen_height;i++)
+	{
+		line_buf[0] = 0;
+		line_buf += LINE_BUF_WIDTH;
+	}
 }
 
 void VIDEO::scroll(int lines)
 {
-
+	char* line_buf = (char*)m_video_buf;
+	memcpy(line_buf, line_buf + lines*LINE_BUF_WIDTH, (m_screen_height - lines)*LINE_BUF_WIDTH);
 }
 
 void VIDEO::gotoxy(int x, int y)
 {
-
+	m_cursor_x = x; 
+	m_cursor_y = y;
 }
 
 int  VIDEO::getx()
 {
-
+	return m_cursor_x;
 }
 
 int  VIDEO::gety()
 {
-
+	return m_cursor_y;
 }
 

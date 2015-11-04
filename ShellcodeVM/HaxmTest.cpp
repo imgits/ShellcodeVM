@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "WinMiniDump.h"
 
-extern "C" void boot_code_start();
-extern "C" void boot_code_end();
-
 void TestDOS(hax_state *State, hax_vcpu_state *Cpu)
 {
 	VCpu_WriteVMCS(Cpu, VMCS_GUEST_CS_SELECTOR, 0);
@@ -62,10 +59,10 @@ void TestDOS(hax_state *State, hax_vcpu_state *Cpu)
 
 	LPVOID mem = VirtualAlloc(nullptr, 16384, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 	memset(mem, 0x90, 16384);
-	uint32 code_start = (uint32)boot_code_start;
-	uint32 code_end   = (uint32)boot_code_end;
-	uint32 code_size = code_end - code_start;
-	memcpy(mem, boot_code_start, code_size);
+	//uint32 code_start = (uint32)boot_code_start;
+	//uint32 code_end   = (uint32)boot_code_end;
+	//uint32 code_size = code_end - code_start;
+	//memcpy(mem, boot_code_start, code_size);
 
 	*(uint64*)((uint64)mem + 0x1000) = 0; //null
 	*(uint64*)((uint64)mem + 0x1008) = 0x00cf9A000000ffff;//code32

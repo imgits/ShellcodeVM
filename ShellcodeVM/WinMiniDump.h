@@ -25,6 +25,8 @@ public:
 	bool Close();
 	bool DumpHeader();
 	bool DumpDirectory();
+	void* RvaToAddress(uint32_t rva);
+	void* GetStream(MINIDUMP_STREAM_TYPE type);
 	bool DumpThreadList(PMINIDUMP_DIRECTORY dir);
 	bool DumpModuleList(PMINIDUMP_DIRECTORY dir);
 	bool DumpMemoryList(PMINIDUMP_DIRECTORY dir);

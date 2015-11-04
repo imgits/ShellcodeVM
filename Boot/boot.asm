@@ -1,5 +1,5 @@
-;%define  OS_LOADER_BASE		0x10000
-%define  BOOT_STACK_BASE		0x10000
+;%define  OS_LOADER_BASE		0x00000000
+%define  BOOT_STACK_BASE		0x00010000
 %define  REBASE16(addr)        ($$ + (addr - boot_code16))
 %define  REBASE32(addr)        ($$ + (addr - boot_code16))
 

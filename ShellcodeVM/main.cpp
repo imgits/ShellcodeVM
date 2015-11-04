@@ -2,56 +2,15 @@
 #include "WinMiniDump.h"
 #include "page_frame.h"
 #include "paging.h"
+#include "os.h"
 
 #define GUEST_RAM_SIZE	(1024*1024*100)
 #define PAGE_TABLE_BASE	0xC0000000
 
-extern "C" void boot_code_start();
-extern "C" void boot_code_end();
+byte*			 guest_ram = NULL;
+OS_INFO*		 os_info = NULL;
 
-pager vm_pager;
-page_frame_database vm_page_frame_db;
-
-bool init_guest_os()
-{
-	uint64  guest_mem = (uint64)malloc(GUEST_RAM_SIZE);
-	vm_pager.Init(&vm_page_frame_db, guest_mem, PAGE_TABLE_BASE);
-	vm_page_frame_db.Init(&vm_pager, GUEST_RAM_SIZE);
-	return true;
-}
-
-//物理页0
-struct system_info
-{
-	uint32 os_physcial_address;
-	uint32 os_virtual_address;
-	uint32 os_image_size;
-	uint32 os_entry_point;
-
-	uint32 shellcode_physcial_address;
-	uint32 shellcode_virtual_address;
-	uint32 shellcode_buffer_size;
-	uint32 shellcode_stack_size;
-
-	uint32 ram_size;
-	uint32 sys_info_size;
-
-	uint32 kernel_code, kernel_data, user_code, user_data;
-	uint32 fs, gs;
-	uint32 mem_blocks;
-	uint32 next_free_page_frame;
-};
-
-//物理页1*256
-struct mem_block_info
-{
-	uint32 physical_address;
-	uint32 virtual_address;
-	uint32 size;
-	uint32 flags;
-};
-
-void SetCpuState(hax_vcpu_state *Cpu, UINT32 EntryPoint)
+void   SetCpuState(hax_vcpu_state *Cpu, UINT32 EntryPoint)
 {
 	VCpu_WriteVMCS(Cpu, VMCS_GUEST_CS_SELECTOR,0);
 	VCpu_WriteVMCS(Cpu, VMCS_GUEST_CS_LIMIT, 0xfffff); //代码位于0x10000以上，因此将CS段限设为1M
@@ -108,7 +67,7 @@ void SetCpuState(hax_vcpu_state *Cpu, UINT32 EntryPoint)
 	VCpu_WriteVMCS(Cpu, VMCS_GUEST_RFLAGS, 0x200 | 0x2);
 }
 
-void Run(hax_state *State, hax_vcpu_state *Cpu, uint64 guest_ram)
+void   Run(hax_state *State, hax_vcpu_state *Cpu, uint64 guest_ram)
 {
 	hax_populate_ram(State->vm, guest_ram, GUEST_RAM_SIZE);
 	hax_set_phys_mem(State, 0, GUEST_RAM_SIZE, guest_ram);
@@ -122,7 +81,46 @@ void Run(hax_state *State, hax_vcpu_state *Cpu, uint64 guest_ram)
 		__debugbreak();
 }
 
-uint32 ReadOsLoader(char* filename, byte* guest_ram)
+bool   LoadMiniDump(char* filename)
+{
+	WinMiniDump MiniDump;
+	if (!MiniDump.Open(filename)) return false;
+	PMINIDUMP_MEMORY64_LIST Mem64List = (PMINIDUMP_MEMORY64_LIST)MiniDump.GetStream(Memory64ListStream);
+	PMINIDUMP_MEMORY_DESCRIPTOR64 mem_desc = Mem64List->MemoryRanges;
+	
+	byte*   DataBase = (byte*)MiniDump.RvaToAddress(Mem64List->BaseRva);
+	os_info->mem_blocks =Mem64List->NumberOfMemoryRanges;
+	
+	MEM_BLOCK_INFO* mem_block_info = (MEM_BLOCK_INFO*)(guest_ram + os_info->ram_used);
+	uint32_t mem_block_list_size = PAGE_ALGIN_SIZE(os_info->mem_blocks * sizeof(MEM_BLOCK_INFO));
+	uint32_t mem_block_data_offset = os_info->ram_used + mem_block_list_size;
+	uint32_t  mem_block_total_size = mem_block_list_size;
+	for (int i = 0; i < Mem64List->NumberOfMemoryRanges; i++, mem_desc++)
+	{
+		mem_block_info[i].physical_address = mem_block_data_offset;
+		mem_block_info[i].virtual_address = mem_desc->StartOfMemoryRange;
+		mem_block_info[i].size = mem_desc->DataSize;
+		mem_block_info[i].flags = BLOCK_MINIDUMP;
+
+		memcpy(guest_ram + mem_block_data_offset, DataBase, mem_desc->DataSize);
+
+		DataBase += mem_desc->DataSize;
+		mem_block_data_offset += mem_desc->DataSize;
+		mem_block_total_size += mem_desc->DataSize;
+	}
+	os_info->ram_used += mem_block_total_size;
+	return true;
+}
+
+bool   ReserveShellcodeMemory()
+{
+	os_info->shellcode_base = os_info->ram_used;
+	os_info->shellcode_buf_size = SHELLCODE_BUF_SIZE;
+	os_info->shellcode_file_size = 0;
+	os_info->ram_used += SHELLCODE_BUF_SIZE;
+}
+
+uint32 LoadBootCode(char* filename)
 {
 	byte buf[0x10000];
 	FILE *fp = fopen(filename, "rb");
@@ -143,23 +141,44 @@ uint32 ReadOsLoader(char* filename, byte* guest_ram)
 	return ImageBase + EntryPoint;
 }
 
+bool   LoadGuestOs(char* filename)
+{
+	FILE* fp = fopen(filename, "rb");
+	if (fp == NULL) return false;
+	fseek(fp, 0, SEEK_END);
+	uint32_t fsize = ftell(fp);
+	rewind(fp);
+	byte*  pbuf = guest_ram + OS_CODE_BASE;
+	if (fread(pbuf, 1, fsize, fp) != fsize)
+	{
+		fclose(fp);
+		return false;
+	}
+
+	PIMAGE_DOS_HEADER dos_hdr = (PIMAGE_DOS_HEADER)pbuf;
+	PIMAGE_NT_HEADERS pe_hdr = (PIMAGE_NT_HEADERS)(pbuf + dos_hdr->e_lfanew);
+
+	os_info->os_physcial_address = OS_CODE_BASE;
+	os_info->os_virtual_address = pe_hdr->OptionalHeader.ImageBase;
+	os_info->os_image_size = pe_hdr->OptionalHeader.SizeOfImage;
+	os_info->os_entry_point = pe_hdr->OptionalHeader.ImageBase + pe_hdr->OptionalHeader.AddressOfEntryPoint;
+	os_info->ram_used = OS_CODE_BASE + PAGE_ALGIN_SIZE(os_info->os_image_size);
+	return true;
+}
+
 
 //物理页4k-64k 为启动代码
 int main(int argc, char *argv[])
 {
-	WinMiniDump MiniDump;
-	MiniDump.Create("MiniDump.Dmp", NULL, 0,
-		(MINIDUMP_TYPE)(
-			(UINT32)MiniDumpWithFullMemory |
-			(UINT32)MiniDumpWithFullMemoryInfo |
-			(UINT32)MiniDumpWithHandleData |
-			(UINT32)MiniDumpWithThreadInfo |
-			(UINT32)MiniDumpWithUnloadedModules
-			)
-		);
-	MiniDump.Open("MiniDump.Dmp");
-	MiniDump.DumpHeader();
-	MiniDump.DumpDirectory();
+	//MiniDump.Create("MiniDump.Dmp", NULL, 0,
+	//	(MINIDUMP_TYPE)(
+	//		(UINT32)MiniDumpWithFullMemory |
+	//		(UINT32)MiniDumpWithFullMemoryInfo |
+	//		(UINT32)MiniDumpWithHandleData |
+	//		(UINT32)MiniDumpWithThreadInfo |
+	//		(UINT32)MiniDumpWithUnloadedModules
+	//		)
+	//	);
 	
 	// Is everything loaded and compatible?
 	if (!VM_HaxEnabled())	return 1;
@@ -175,12 +194,19 @@ int main(int argc, char *argv[])
 
 	VCpu_Init(cpu);
 	byte* guest_ram = (byte*)VirtualAlloc(nullptr, GUEST_RAM_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-	uint32 OsLoader_EntryPoint = ReadOsLoader(argv[1], guest_ram);
+	os_info = (OS_INFO*)(guest_ram + OS_INFO_BASE);
+	memset(os_info, 0, sizeof(OS_INFO));
+	uint32 OsLoader_EntryPoint = LoadBootCode(argv[1]);
 	if (OsLoader_EntryPoint != 0)
 	{
+		LoadGuestOs(argv[2]);
+		LoadMiniDump(argv[3]);
+		ReserveShellcodeMemory();
+
 		SetCpuState(cpu, OsLoader_EntryPoint);
 		Run(state, cpu, (UINT64)guest_ram);
 	}
+	
 	//init_guest_os();
 	//dump_vcpu_state(cpu);
 

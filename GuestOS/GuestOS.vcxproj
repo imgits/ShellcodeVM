@@ -148,17 +148,7 @@
     <ClCompile Include="kernel.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="boot.asm">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\nasm\nasm.exe -f win32 ./boot.asm -o $(Configuration)\boot.obj</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\boot.obj</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\nasm\nasm.exe -f win64 ./boot.asm -o $(Configuration)\boot.obj</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)\boot.obj</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\boot.obj</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\nasm\nasm.exe -f win64 ./boot.asm -o $(Configuration)\boot.obj</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\boot.bin</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\nasm\nasm.exe -f bin ./boot.asm -o $(Configuration)\boot.bin</Command>
-    </CustomBuild>
+    <ClInclude Include="os.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

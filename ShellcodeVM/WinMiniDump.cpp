@@ -99,6 +99,25 @@ bool WinMiniDump::Open(char* Filename)
 	return true;
 }
 
+void* WinMiniDump::GetStream(MINIDUMP_STREAM_TYPE type)
+{
+	PMINIDUMP_DIRECTORY StreamDir = NULL;
+	PVOID               StreamPointer = 0;
+	ULONG               StreamSize = 0;
+	BOOL ret = MiniDumpReadDumpStream(
+		m_MapBuf,
+		type,
+		&StreamDir,
+		&StreamPointer,
+		&StreamSize);
+	if (ret && StreamPointer) return StreamPointer;
+	return NULL;
+}
+
+void* WinMiniDump::RvaToAddress(uint32_t rva)
+{
+	return (void*)(m_MapBuf + rva);
+}
 
 void WinMiniDump::ShowError(char* Note, DWORD Error)
 {

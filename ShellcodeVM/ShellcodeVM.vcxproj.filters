@@ -102,9 +102,4 @@
   <ItemGroup>
     <None Include="MiniDump.dmp" />
   </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="boot.asm">
-      <Filter>源文件</Filter>
-    </CustomBuild>
-  </ItemGroup>
 </Project>

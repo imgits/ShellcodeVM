@@ -20,8 +20,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="boot.asm">
-      <Filter>源文件</Filter>
-    </CustomBuild>
+    <ClInclude Include="os.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
