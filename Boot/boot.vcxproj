@@ -83,16 +83,19 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MinimalRebuild>false</MinimalRebuild>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <AdditionalIncludeDirectories>E:\GitHub\ShellcodeOS\libc;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Native</SubSystem>
-      <EntryPointSymbol>boot_code_start</EntryPointSymbol>
-      <BaseAddress>0x800000000</BaseAddress>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <EntryPointSymbol>boot_code16</EntryPointSymbol>
+      <BaseAddress>0x10000</BaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
       <Driver>Driver</Driver>
-      <AdditionalDependencies />
+      <AdditionalDependencies>E:\GitHub\ShellcodeOS\Debug\oslibc.lib;</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalOptions> /filealign:0x1000 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,12 +117,13 @@
       <SDLCheck>true</SDLCheck>
       <ExceptionHandling>false</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <AdditionalIncludeDirectories>E:\GitHub\ShellcodeOS\libc;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies />
+      <AdditionalDependencies>E:\GitHub\ShellcodeOS\Release\oslibc.lib;</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <EntryPointSymbol>main</EntryPointSymbol>
       <BaseAddress>0x10000</BaseAddress>
@@ -153,8 +157,8 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)\boot.obj</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\boot.obj</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\nasm\nasm.exe -f win64 ./boot.asm -o $(Configuration)\boot.obj</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\boot.bin</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\nasm\nasm.exe -f bin ./boot.asm -o $(Configuration)\boot.bin</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\boot.obj</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\nasm\nasm.exe -f win32 ./boot.asm -o $(Configuration)\boot.obj</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -162,11 +166,14 @@
     <ClCompile Include="idt.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="paging.cpp" />
+    <ClCompile Include="video.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdt.h" />
     <ClInclude Include="idt.h" />
+    <ClInclude Include="os.h" />
     <ClInclude Include="paging.h" />
+    <ClInclude Include="video.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

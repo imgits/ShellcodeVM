@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShellcodeVM", "ShellcodeVM\ShellcodeVM.vcxproj", "{C27C6721-3007-443E-B095-51024C1B8236}"
+	ProjectSection(ProjectDependencies) = postProject
+		{77EB0E19-AA23-415C-B34B-8BDCD4CD495D} = {77EB0E19-AA23-415C-B34B-8BDCD4CD495D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GuestOS", "GuestOS\GuestOS.vcxproj", "{70B6C809-92DB-4C09-8E45-C6ED3256412B}"
 EndProject
