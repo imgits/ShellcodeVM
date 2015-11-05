@@ -200,8 +200,6 @@ int main(int argc, char *argv[])
 			exit_status = cpu->run();
 			cpu->get_cpu_state();
 			cpu->show_state();
-			msrs.done = 0;
-			cpu->get_msrs(&msrs);
 			switch (exit_status)
 			{
 				// Regular I/O

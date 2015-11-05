@@ -3,24 +3,26 @@
 /*
 OS内存布局:
 物理地址                           虚拟地址
-00000000 +-----------------------+
+00000000 +-----------------------+ 0x80000000
          |    boot_code(<60k)    |
 		 |       ...             |
 		 |    boot stack         |
-00010000 +-----------------------+
+00010000 +-----------------------+ 0x80010000
 		 |    video_buffer       |
-00020000 +-----------------------+
+00020000 +-----------------------+ 0x80020000
          |    system_info        |
-00021000 +-----------------------+
-		 |    block_guestos      |
+		 |  (guestOS PE header   |
+00021000 +-----------------------+ 0x80021000
+		 |    guestOS body       |
 		 |       ...             |
+         +-----------------------+
 		 |    mem_block_list     |
 		 |       ...             |
 		 |    block_minidump     |
+		 +-----------------------+
+		 |    shellcode buffer   |
 		 |       ...             |
-		 |    block_shellcode    |
-		 |       ...             |
-???????? +-----------------------+
+		 +-----------------------+
 		 |   free_page_frame     |
 		 |                       |
 		 |                       |
@@ -33,12 +35,15 @@ mem_block_list[2] = mem_block_minidump
 mem_block_list[n] = mem_block_minidump
 */
 
+#define		VM_RAM_SIZE		(1024*1024*100)
+
 #define		BOOT_CODE_BASE		0x00000000
 #define		BOOT_CODE_STACK		0x00010000
 #define     VIDEO_BUF_BASE		0x00010000
 #define     VIDEO_BUF_SIZE		0x00010000
-#define     OS_INFO_BASE		0x00020000
-#define     OS_CODE_BASE		0x00021000
+#define     OS_CODE_BASE		0x00020000
+#define     VM_CONTEXT_BASE		OS_CODE_BASE
+
 
 #define     SHELLCODE_BUF_SIZE  (1024*1024*10)
 
@@ -51,10 +56,12 @@ mem_block_list[n] = mem_block_minidump
 #define     PAGES_TO_SIZE(pages) ((uint32_t)(pages)<<12)
 #define     PAGE_ALGIN_SIZE(size)((uint32_t)(size + 4095)&0xFFFFF000)
 
-struct OS_INFO
+struct VM_CONTEXT
 {
+	uint32_t ram_base;
 	uint32_t ram_size;
-	uint32_t sys_info_size;
+	uint32_t ram_used;
+	uint32_t boot_start;
 
 	uint32_t video_buf_base;
 	uint32_t video_buf_size;
@@ -71,8 +78,6 @@ struct OS_INFO
 	//uint32_t kernel_code, kernel_data, user_code, user_data;
 	//uint32_t fs, gs;
 	uint32_t mem_blocks;
-	uint32_t page_frame_used;
-	uint32_t ram_used;
 };
 
 //物理页2*256

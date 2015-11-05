@@ -12,7 +12,7 @@ IDT		idt;
 PAGER	pager;
 VIDEO   video;
 
-OS_INFO*  osinfo = (OS_INFO*)OS_INFO_BASE;
+VM_CONTEXT*  vm = (VM_CONTEXT*)VM_CONTEXT_BASE;
 
 extern "C"  int liballoc_lock()		{	return 0;}
 extern "C"  int liballoc_unlock()	{	return 0;}
@@ -22,11 +22,18 @@ extern "C"  int liballoc_free(void*ptr, int size){return 0;}
 void main()
 {
 	CppInit();
-	video.Init(0x20000, 0x10000, 100, 100);
+	video.Init(vm->video_buf_base, vm->video_buf_size, 100, 100);
 	video.puts("hello world\n");
+	uint32_t buf_base = vm->video_buf_base;
+	uint32_t buf_size = vm->video_buf_size;
+
+	__asm mov eax, buf_base
+	__asm mov ebx, buf_size
+
 	gdt.Init();
 	idt.Init();
-	pager.Init(osinfo->page_frame_used, SIZE_TO_PAGES(osinfo->ram_size));
+
+	pager.Init(SIZE_TO_PAGES(vm->ram_used), SIZE_TO_PAGES(vm->ram_size));
 	__asm mov eax,0x12345678
 	__asm mov ebx,0x87654321
 	__asm hlt

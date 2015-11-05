@@ -60,6 +60,18 @@
     <ClInclude Include="WinMiniDump.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="HAXM.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HAXM_CPU.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HAXM_VM.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="msr.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HaxmTest.cpp">

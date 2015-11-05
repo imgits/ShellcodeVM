@@ -83,13 +83,14 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MinimalRebuild>false</MinimalRebuild>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Native</SubSystem>
-      <EntryPointSymbol>boot_code_start</EntryPointSymbol>
-      <BaseAddress>0x800000000</BaseAddress>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <EntryPointSymbol>main</EntryPointSymbol>
+      <BaseAddress>0x80020000</BaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
       <Driver>Driver</Driver>
       <AdditionalDependencies />
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>

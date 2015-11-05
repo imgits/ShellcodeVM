@@ -111,138 +111,123 @@ typedef struct segment_desc_t segment_desc_t;
 
 struct vcpu_state_t
 {
-	union
-	{
-		uint64 _regs[16];
-		struct
-		{
-			union
-			{
-				struct
-				{
-					uint8 _al,
-						_ah;
-				};
-				uint16_t    _ax;
-				uint32    _eax;
-				uint64    _rax;
-			};
-			union
-			{
-				struct
-				{
-					uint8 _cl,
-						_ch;
-				};
-				uint16_t    _cx;
-				uint32    _ecx;
-				uint64    _rcx;
-			};
-			union
-			{
-				struct
-				{
-					uint8 _dl,
-						_dh;
-				};
-				uint16_t    _dx;
-				uint32    _edx;
-				uint64    _rdx;
-			};
-			union
-			{
-				struct
-				{
-					uint8 _bl,
-						_bh;
-				};
-				uint16_t    _bx;
-				uint32    _ebx;
-				uint64    _rbx;
-			};
-			union
-			{
-				uint16_t    _sp;
-				uint32    _esp;
-				uint64    _rsp;
-			};
-			union
-			{
-				uint16_t    _bp;
-				uint32    _ebp;
-				uint64    _rbp;
-			};
-			union
-			{
-				uint16_t    _si;
-				uint32    _esi;
-				uint64    _rsi;
-			};
-			union
-			{
-				uint16_t    _di;
-				uint32    _edi;
-				uint64    _rdi;
-			};
+    union {
+        uint64 _regs[16];
+        struct {
+            union {
+                struct {
+                    uint8 _al,
+                          _ah;
+                };
+                uint16_t    _ax;
+                uint32    _eax;
+                uint64    _rax;
+            };
+            union {
+                struct {
+                    uint8 _cl,
+                          _ch;
+                };
+                uint16_t    _cx;
+                uint32    _ecx;
+                uint64    _rcx;
+            };
+            union {
+                struct {
+                    uint8 _dl,
+                          _dh;
+                };
+                uint16_t    _dx;
+                uint32    _edx;
+                uint64    _rdx;
+            };
+            union {
+                struct {
+                    uint8 _bl,
+                          _bh;
+                };
+                uint16_t    _bx;
+                uint32    _ebx;
+                uint64    _rbx;
+            };
+            union {
+                uint16_t    _sp;
+                uint32    _esp;
+                uint64    _rsp;
+            };
+            union {
+                uint16_t    _bp;
+                uint32    _ebp;
+                uint64    _rbp;
+            };
+            union {
+                uint16_t    _si;
+                uint32    _esi;
+                uint64    _rsi;
+            };
+            union {
+                uint16_t    _di;
+                uint32    _edi;
+                uint64    _rdi;
+            };
 
-			uint64 _r8;
-			uint64 _r9;
-			uint64 _r10;
-			uint64 _r11;
-			uint64 _r12;
-			uint64 _r13;
-			uint64 _r14;
-			uint64 _r15;
-		};
-	};
+            uint64 _r8;
+            uint64 _r9;
+            uint64 _r10;
+            uint64 _r11;
+            uint64 _r12;
+            uint64 _r13;
+            uint64 _r14;
+            uint64 _r15;
+        };
+    };
 
-	union
-	{
-		uint32 _eip;
-		uint64 _rip;
-	};
+    union {
+        uint32 _eip;
+        uint64 _rip;
+    };
 
-	union
-	{
-		uint32 _eflags;
-		uint64 _rflags;
-	};
+    union {
+        uint32 _eflags;
+        uint64 _rflags;
+    };
 
-	segment_desc_t _cs;
-	segment_desc_t _ss;
-	segment_desc_t _ds;
-	segment_desc_t _es;
-	segment_desc_t _fs;
-	segment_desc_t _gs;
-	segment_desc_t _ldt;
-	segment_desc_t _tr;
+    segment_desc_t _cs;
+    segment_desc_t _ss;
+    segment_desc_t _ds;
+    segment_desc_t _es;
+    segment_desc_t _fs;
+    segment_desc_t _gs;
+    segment_desc_t _ldt;
+    segment_desc_t _tr;
 
-	segment_desc_t _gdt;
-	segment_desc_t _idt;
+    segment_desc_t _gdt;
+    segment_desc_t _idt;
 
-	uint64 _cr0;
-	uint64 _cr2;
-	uint64 _cr3;
-	uint64 _cr4;
+    uint64 _cr0;
+    uint64 _cr2;
+    uint64 _cr3;
+    uint64 _cr4;
 
-	uint64 _dr0;
-	uint64 _dr1;
-	uint64 _dr2;
-	uint64 _dr3;
-	uint64 _dr6;
-	uint64 _dr7;
-	uint64 _pde;
+    uint64 _dr0;
+    uint64 _dr1;
+    uint64 _dr2;
+    uint64 _dr3;
+    uint64 _dr6;
+    uint64 _dr7;
+    uint64 _pde;
 
-	uint32 _efer;
+    uint32 _efer;
 
-	uint32 _sysenter_cs;
-	uint64 _sysenter_eip;
-	uint64 _sysenter_esp;
+    uint32 _sysenter_cs;
+    uint64 _sysenter_eip;
+    uint64 _sysenter_esp;
 
-	uint32 _activity_state;
-	uint32 pad;
-	interruptibility_state_t _interruptibility_state;
+    uint32 _activity_state;
+    uint32 pad;
+    interruptibility_state_t _interruptibility_state;
 };
+
 /*
  * HAX tunnel is a per-vCPU shared memory between QEMU and HAX driver
  * It is used to pass information between QEMU and HAX driver, like KVM_RUN
@@ -278,8 +263,8 @@ struct hax_tunnel
         struct {
             uint64_t gla;
         } mmio;
-//        struct {
-//        } state;
+        struct {
+        } state;
     };
 };
 
@@ -304,33 +289,33 @@ enum exit_status {
      * 5. QEMU sync the vcpu state to HAX driver
      * 6. HAX driver continuous run the guest through HAX_VCPU_IOCTL_RUN
      */
-    HAX_EXIT_MMIO=2,
+    HAX_EXIT_MMIO,
     /*
      * QEMU emulation mode request
      * QEMU emulates guest instruction when guest is running in
      * real mode or protected mode
      */
-    HAX_EXIT_REAL=3,
+    HAX_EXIT_REAL,
     /*
      * Interrupt window open, qemu can inject an interrupt now.
      * Also used to indicate a signal is pending to QEMU
      */
-    HAX_EXIT_INTERRUPT=4,
+    HAX_EXIT_INTERRUPT,
     /* Unknown vmexit, mostly trigger reboot */
-    HAX_EXIT_UNKNOWN_VMEXIT=5,
+    HAX_EXIT_UNKNOWN_VMEXIT,
     /*
      * Halt in guest
      * When guest executes HLT instruction with interrupt enabled, HAX
      * return back to QEMU.
      */
-    HAX_EXIT_HLT=6,
+    HAX_EXIT_HLT,
     /* Reboot request, like because of tripple fault in guest */
-    HAX_EXIT_STATECHANGE=7,
+    HAX_EXIT_STATECHANGE,
     /*
      * The VCPU is paused
      * Now the vcpu is only paused when to be destroid, so simply return to hax
      */
-    HAX_EXIT_PAUSED=8,
+    HAX_EXIT_PAUSED,
     /* from API 2.0 */
     /*
      * In API 1.0, HAXM driver utilizes QEMU to decode and emulate MMIO
@@ -338,7 +323,7 @@ enum exit_status {
      * From 2.0, HAXM driver will decode some MMIO instructions to improve
      * MMIO handling performance, especially for GLES hardware acceleration
      */
-    HAX_EXIT_FAST_MMIO=9,
+    HAX_EXIT_FAST_MMIO,
 };
 
 /*

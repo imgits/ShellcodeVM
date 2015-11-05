@@ -87,7 +87,7 @@
       <AdditionalIncludeDirectories>..\..\ShellcodeOS\libc;..\GuestOS;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <SubSystem>Native</SubSystem>
       <EntryPointSymbol>boot_code16</EntryPointSymbol>
       <BaseAddress>0x00000000</BaseAddress>

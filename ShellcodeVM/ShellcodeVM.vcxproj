@@ -134,7 +134,11 @@
     <ClInclude Include="hax-i386.h" />
     <ClInclude Include="hax-interface.h" />
     <ClInclude Include="hax-windows.h" />
+    <ClInclude Include="HAXM.h" />
+    <ClInclude Include="HAXM_CPU.h" />
+    <ClInclude Include="HAXM_VM.h" />
     <ClInclude Include="HaxVM.h" />
+    <ClInclude Include="msr.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="vcpu.h" />
     <ClInclude Include="VirtualContext.h" />
