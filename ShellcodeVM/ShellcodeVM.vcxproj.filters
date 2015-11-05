@@ -27,9 +27,6 @@
     <ClInclude Include="hax-interface.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="HaxVM.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="hax-windows.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -37,15 +34,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="vcpu.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="VirtualContext.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="VirtualCPU.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="VM.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="VMCS.h">
@@ -74,28 +62,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="HaxmTest.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="HaxVM.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="hax-windows.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="VirtualContext.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="VirtualCPU.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="VirtualIO.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="VM.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="VM\page_frame.cpp">

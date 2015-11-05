@@ -380,3 +380,42 @@ public:
 	}
 };
 
+int write_vmcs(char* name, int value)
+{
+	return 0;
+}
+
+//HAX_VCPU_IOCTL_SET_MSRS
+int set_msrs(int msr, int value)
+{
+	if (msr <= 0x1d9)
+	{
+		if (msr == 0x1d9) return 0;
+		if (msr > 0xfe)
+		{
+			if (msr == 0x174)  return write_vmcs("GUEST_SYSENTER_CS", value);
+			if (msr == 0x175)  return write_vmcs("GUEST_SYSENTER_ESP", value);
+			if (msr == 0x175)  return write_vmcs("GUEST_SYSENTER_EIP", value);
+			if (msr == 0x17A)  return 0;
+			if (msr == 0x1A0)  return 0;
+			goto LABEL_12;
+		}
+		if (msr == 0xFE)                       // IA32_MTRRCAP (MTRRcap)
+		{
+			//*(_QWORD *)&vcpu->u0208 = value;
+			return 0;
+		}
+		if (msr == 16) //IA32_TIME_STAMP_COUNTER (TSC)
+		{
+			return write_vmcs("VMX_TSC_OFFSET", value);
+		}
+		if (msr == 27) return 0;                      // IA32_APIC_BASE (APIC_BASE)
+		if (msr <= 0x29) goto LABEL_12;
+		if (msr <= 0x2C || msr == 0x79) return 0; //IA32_BIOS_UPDT_TRIG(BIOS_UPDT_TRIG)=0x79
+		if (msr == 0x8B) return 0; //IA32_BIOS_SIGN_ID
+		goto LABEL_12;
+	}
+LABEL_12:
+	return 0;
+	//*((_QWORD *)&vcpu->u0008 + 2 * (((unsigned __int8)msr >> 1) + 39i64)) = value;
+}

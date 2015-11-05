@@ -259,6 +259,6 @@ int main(int argc, char *argv[])
 	}
 	VirtualFree((void*)vm_context.ram_base, 0, MEM_RELEASE);
 
-	getchar();
+	//getchar();
 	return 0;
 }

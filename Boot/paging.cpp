@@ -29,7 +29,7 @@ bool  PAGER::Init(uint32_t page_frame_min, uint32_t page_frame_max)
 	m_database_usable = false;
 
 	__asm mov eax, page_frame_min
-	__asm mov ebx, page_frame_max
+	__asm mov ebx, PAGE_TABLE_BASE
 	__asm mov edx, PAGE_TABLE_BASE
 	__asm hlt
 

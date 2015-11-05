@@ -137,13 +137,9 @@
     <ClInclude Include="HAXM.h" />
     <ClInclude Include="HAXM_CPU.h" />
     <ClInclude Include="HAXM_VM.h" />
-    <ClInclude Include="HaxVM.h" />
     <ClInclude Include="msr.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="vcpu.h" />
-    <ClInclude Include="VirtualContext.h" />
-    <ClInclude Include="VirtualCPU.h" />
-    <ClInclude Include="VM.h" />
     <ClInclude Include="VMCS.h" />
     <ClInclude Include="VM\page_frame.h" />
     <ClInclude Include="VM\paging.h" />
@@ -151,14 +147,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="hax-windows.c" />
-    <ClCompile Include="HaxmTest.cpp" />
-    <ClCompile Include="HaxVM.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="VirtualContext.cpp" />
-    <ClCompile Include="VirtualCPU.cpp" />
-    <ClCompile Include="VirtualIO.cpp" />
-    <ClCompile Include="VM.cpp" />
     <ClCompile Include="VM\page_frame.cpp" />
     <ClCompile Include="VM\paging.cpp" />
     <ClCompile Include="WinMiniDump.cpp" />
