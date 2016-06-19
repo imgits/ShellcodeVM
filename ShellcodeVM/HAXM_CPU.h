@@ -11,6 +11,14 @@ using namespace std;
 #define HAX_EMULATE_STATE_NONE		0x3
 #define HAX_EMULATE_STATE_INITIAL	0x4
 
+struct BIT_FIELD
+{
+	int 	bit_index;
+	int     bit_count;
+	char*	bit_name;
+	char*   description;
+};
+
 class HAXM_CPU
 {
 private:
@@ -18,11 +26,11 @@ private:
 	UINT32 m_vcpuid;
 	HANDLE m_hCPU;
 	hax_tunnel *m_tunnel;
-	char*  m_iobuf;
-	vcpu_state_t m_state;
+	hax_fastmmio*  m_iobuf;//该指针类型根据逆向工程获取
+	//vcpu_state_t   m_state;
 	UINT32 m_emulation_state;
 public:
-
+	vcpu_state_t   m_state;
 	HAXM_CPU(UINT32 vmid, UINT32 vcpuid)
 	{
 		m_vmid = vmid;
@@ -93,7 +101,7 @@ public:
 			return false;
 		}
 		m_tunnel = (struct hax_tunnel *)(info.va);
-		m_iobuf = (char *)(info.io_va);
+		m_iobuf = (hax_fastmmio *)(info.io_va);
 		return true;
 	}
 
@@ -103,6 +111,10 @@ public:
 		hax_fd fd;
 		HANDLE hDeviceVCPU;
 		DWORD dSize = 0;
+		for (int i = 0; i < msrs->nr_msr;i++)
+		{
+			msrs->entries[i].value = 0x123456789ABCDEF0;
+		}
 		ret = DeviceIoControl(m_hCPU,
 			HAX_VCPU_IOCTL_GET_MSRS,
 			msrs, sizeof(*msrs),
@@ -204,20 +216,107 @@ public:
 		return (!!ret);
 	}
 
+	void  show_reg_bits(char* reg_name, BIT_FIELD* bits, UINT64 reg_value)
+	{
+		printf("%s=%016I64X\n", reg_name, reg_value);
+		UINT64 bit_mask = 0;
+		UINT64 bit_value= 0;
+		for (int i = 0; i < 64; i++)
+		{
+			if (bits[i].bit_name == NULL) break;
+			printf("%12s =", bits[i].bit_name);
+			bit_mask = 0;
+			for (int j = 0; j < bits[i].bit_count; j++) bit_mask = bit_mask * 2 + 1;
+			bit_value = (reg_value >> bits[i].bit_index) & bit_mask;
+			printf("%d %s [bit%d]\n", (UINT32)bit_value, bits[i].description, bits[i].bit_index);
+		}
+	}
+
 	bool  show_state()
 	{
-		printf("RAX=%16I64X RBX=%16I64X RCX=%16I64X RDX=%16I64X \n", m_state._rax, m_state._rbx, m_state._rcx,m_state._rcx);
-		printf("RSP=%16I64X RBP=%16I64X RSI=%16I64X RDI=%16I64X \n", m_state._rsp, m_state._rbp, m_state._rsi, m_state._rdi);
-		printf("RIP=%16I64X FLG=%16I64X PDE=%16I64X EFE=%08X \n", m_state._rip, m_state._rflags, m_state._pde, m_state._efer);
-		printf("cs %04X %02X %16I64X:%08X \n", m_state._cs.selector, m_state._cs.ar, m_state._cs.base, m_state._cs.limit);
-		printf("ds %04X %02X %16I64X:%08X \n", m_state._ds.selector, m_state._ds.ar, m_state._ds.base, m_state._ds.limit);
-		printf("fs %04X %02X %16I64X:%08X \n", m_state._fs.selector, m_state._fs.ar, m_state._fs.base, m_state._fs.limit);
-		printf("GDTR %16I64X:%08X IDTR %16I64X:%08X\n", m_state._gdt.base, m_state._gdt.limit, m_state._idt.base, m_state._idt.limit);
-		printf("CR0=%16I64X CR2=%16I64X CR3=%16I64X CR4=%16I64X \n", m_state._cr0, m_state._cr2, m_state._cr3, m_state._cr4);
-		printf("DR0=%16I64X DR1=%16I64X DR2=%16I64X DR3=%16I64X \n", m_state._dr0, m_state._dr1, m_state._dr2, m_state._dr3);
-		printf("DR6=%16I64X DR7=%16I64X INT=%16I64X ACT=%08X \n", m_state._dr6, m_state._dr7, m_state._interruptibility_state, m_state._activity_state);
-		printf("SYSENTER CS=%02X RIP=%16I64X RSP=%16I64X \n", m_state._sysenter_cs, m_state._sysenter_eip, m_state._sysenter_esp);
+		printf("--------------------------------------- GPRs -------------------------------\n");
+		printf("RAX=%016I64X RBX=%016I64X RCX=%016I64X RDX=%016I64X \n", m_state._rax, m_state._rbx, m_state._rcx,m_state._rdx);
+		printf("RSP=%016I64X RBP=%016I64X RSI=%016I64X RDI=%016I64X \n", m_state._rsp, m_state._rbp, m_state._rsi, m_state._rdi);
+		printf("R8 =%016I64X R9 =%016I64X R10=%016I64X R11=%016I64X \n", m_state._r8, m_state._r9, m_state._r10, m_state._r11);
+		printf("R12=%016I64X R13=%016I64X R14=%016I64X R15=%016I64X \n", m_state._r12, m_state._r13, m_state._r14, m_state._r15);
+		printf("RIP=%016I64X FLG=%016I64X PDE=%016I64X EFE=%08X \n", m_state._rip, m_state._rflags, m_state._pde, m_state._efer);
 		printf("\n");
+		printf("CR0=%016I64X CR2=%016I64X CR3=%016I64X CR4=%016I64X \n", m_state._cr0, m_state._cr2, m_state._cr3, m_state._cr4);
+		printf("DR0=%016I64X DR1=%016I64X DR2=%016I64X DR3=%016I64X \n", m_state._dr0, m_state._dr1, m_state._dr2, m_state._dr3);
+		printf("DR6=%016I64X DR7=%016I64X INT=%016I64X ACT=%08X \n", m_state._dr6, m_state._dr7, m_state._interruptibility_state, m_state._activity_state);
+		printf("\n");
+		printf("SYSENTER_CS=%08X RIP=%016I64X RSP=%016I64X \n", m_state._sysenter_cs, m_state._sysenter_eip, m_state._sysenter_esp);
+		printf("\n");
+		printf("sreg  selector     ar         base       limit\n");
+		printf("CS      %04X %8X %016I64X %08X \n", m_state._cs.selector, m_state._cs.ar, m_state._cs.base, m_state._cs.limit);
+		printf("DS      %04X %8X %016I64X %08X \n", m_state._ds.selector, m_state._ds.ar, m_state._ds.base, m_state._ds.limit);
+		printf("ES      %04X %8X %016I64X %08X \n", m_state._es.selector, m_state._es.ar, m_state._es.base, m_state._es.limit);
+		printf("FS      %04X %8X %016I64X %08X \n", m_state._fs.selector, m_state._fs.ar, m_state._fs.base, m_state._fs.limit);
+		printf("GS      %04X %8X %016I64X %08X \n", m_state._gs.selector, m_state._gs.ar, m_state._gs.base, m_state._gs.limit);
+		printf("SS      %04X %8X %016I64X %08X \n", m_state._ss.selector, m_state._ss.ar, m_state._ss.base, m_state._ss.limit);
+		printf("\n");
+		printf("GDTR    %04X %8X %016I64X %08X \n", m_state._gdt.selector, m_state._gdt.ar, m_state._gdt.base, m_state._gdt.limit);
+		printf("IDTR    %04X %8X %016I64X %08X \n", m_state._idt.selector, m_state._idt.ar, m_state._idt.base, m_state._idt.limit);
+		printf("LDTR    %04X %8X %016I64X %08X \n", m_state._ldt.selector, m_state._ldt.ar, m_state._ldt.base, m_state._ldt.limit);
+		printf("TR      %04X %8X %016I64X %08X \n", m_state._tr.selector, m_state._tr.ar, m_state._tr.base, m_state._tr.limit);
+		printf("\n");
+		
+		BIT_FIELD CR0[] = {
+		{ 0, 1, "PE", "Protection Enabled" },
+		{ 1, 1, "MP", "Monitor Coprocessor" },
+		{ 2, 1, "EM", "Emulation FPU" },
+		{ 3, 1, "TS", "Task Switched" },
+		{ 4, 1, "ET", "Extension Type" },
+		{ 5, 1, "NE", "Numeric Error" },
+		{ 16, 1, "WP", "Write Protect" },
+		{ 18, 1, "AM", "Alignment Mask" },
+		{ 29, 1, "NW", "Not Writethrough" },
+		{ 30, 1, "CD", "Cache Disable" },
+		{ 31, 1, "PG", "Paging" },
+		{0,0,NULL,NULL}
+		};
+		
+		BIT_FIELD CR4[] = {
+			{ 0, 1, "VME", "Virtual-8086 Mode Extensions" },
+			{ 1, 1, "PVI", "Protected-Mode Virtual Interrupts" },
+			{ 2, 1, "TDS", "Time Stamp Disable" },
+			{ 3, 1, "DE", "Debugging Extensions" },
+			{ 4, 1, "PSE", "Page Size Extensions" },
+			{ 5, 1, "PAE", "Physical Address Extension" },
+			{ 6, 1, "MCE", "Machine-Check Enable" },
+			{ 7, 1, "PG", "Page Global Enable" },
+			{ 8, 1, "PCE", "Performance-Monitoring Counter Enable" },
+			{ 9, 1, "OSFXSR", "Operating System Support for FXSAVE and FXRSTOR instructions" },
+			{ 10, 1, "OSXMMEXCPT", "Operating System Support for Unmasked SIMD Floating-Point Exceptions" },
+			{ 13, 1, "VMXE", "VMX-Enable" },
+			{ 14, 1, "WMXE", "SMX-Enable" },
+			{ 16, 1, "FSGSBASE", "FSGSBASE-Enable" },
+			{ 17, 1, "PCIDE", "PCID-Enable" },
+			{ 18, 1, "OSXSAVE", "XSAVE and Processor Extended States-Enable" },
+			{ 20, 1, "SMEP", "SMEP-Enable" },
+			{ 21, 1, "SMAP", "SMAP-Enable" },
+			{ 22, 1, "PKE", "Protection-Key-Enable" },
+			{ 0, 0, NULL, NULL }
+		};
+		//Extended Feature Enable Register
+		BIT_FIELD EFER[] = {
+			{ 0, 1, "SCE", "System-Call Extension" },
+			{ 8, 1, "LME", "Long Mode Enable" },
+			{ 10, 1, "LMA", "Long Mode Active" },
+			{ 11, 1, "NXE", "No-Execute Enable " },
+			{ 12, 1, "SVME", "Secure Virtual Machine Enable" },
+			{ 13, 1, "LMSLE", "Long Mode Segment Limit Enable" },
+			{ 14, 1, "FFXSR", "Fast FXSAVE/FXRSTOR" },
+			{ 0, 0, NULL, NULL }
+		};
+
+		//show_reg_bits("CR0", CR0, m_state._cr0);
+		//show_reg_bits("CR4", CR4, m_state._cr4);
+		//show_reg_bits("EFER", EFER, m_state._efer);
+
+		//show_reg_bits("CR0", CR0, 0x21);
+		//show_reg_bits("CR4", CR4, 0x2000);
+
 		return true;
 	}
 
@@ -230,8 +329,6 @@ public:
 	(seg).desc = ((value) >> 4) & 1; \
 	(seg).type = ((value) >> 0) & ~(~0 << (3-0+1));
 
-		// Query the CPU state
-		if (!get_cpu_state()) __debugbreak();
 
 		// Set the required field
 		switch (field)
@@ -299,8 +396,6 @@ public:
 			__debugbreak();
 		}
 
-		// Set the new CPU m_state
-		if (!set_cpu_state()) __debugbreak();
 	}
 
 	void   reset(UINT32 EntryPoint)
@@ -308,6 +403,8 @@ public:
 		m_emulation_state = HAX_EMULATE_STATE_INITIAL;
 		m_tunnel->user_event_pending = 0;
 		m_tunnel->ready_for_interrupt_injection = 0;
+
+		if (!get_cpu_state()) __debugbreak();
 
 		write_vmcs(VMCS_GUEST_CS_SELECTOR, 0);
 		write_vmcs(VMCS_GUEST_CS_LIMIT, 0xfffff); //代码可能位于0x10000以上，因此将CS段限设为1M
@@ -359,9 +456,11 @@ public:
 		write_vmcs(VMCS_GUEST_CR3, 0x0);
 		write_vmcs(VMCS_GUEST_CR4, 0x2000);
 
-		write_vmcs(VMCS_GUEST_RSP, 0x100);
+		write_vmcs(VMCS_GUEST_RSP, EntryPoint-4);
 		write_vmcs(VMCS_GUEST_RIP, EntryPoint);
 		write_vmcs(VMCS_GUEST_RFLAGS, 0x200 | 0x2);
+
+		if (!set_cpu_state()) __debugbreak();
 	}
 
 	int  run()

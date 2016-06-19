@@ -21,24 +21,24 @@
 
 /* fx_layout according to Intel SDM */
 struct fx_layout {
-    uint16_t    fcw;
-    uint16_t    fsw;
+    uint16    fcw;
+    uint16    fsw;
     uint8       ftw;
     uint8       res1;
-    uint16_t    fop;
+    uint16    fop;
     union {
         struct {
             uint32      fip;
-            uint16_t    fcs;
-            uint16_t    res2;
+            uint16    fcs;
+            uint16    res2;
         };
         uint64  fpu_ip;
     };
     union {
         struct {
             uint32      fdp;
-            uint16_t    fds;
-            uint16_t    res3;
+            uint16    fds;
+            uint16    res3;
         };
         uint64 fpu_dp;
     };
@@ -62,19 +62,21 @@ struct vmx_msr {
 #define HAX_MAX_MSR_ARRAY 0x20
 struct hax_msr_data
 {
-    uint16_t nr_msr;
-    uint16_t done;
-    uint16_t pad[2];
+    uint16 nr_msr;
+    uint16 done;
+    uint16 pad[2];
     struct vmx_msr entries[HAX_MAX_MSR_ARRAY];
 };
 
-union interruptibility_state_t {
+union interruptibility_state_t 
+{
     uint32 raw;
-    struct {
-        uint32 sti_blocking   : 1;
-        uint32 movss_blocking : 1;
-        uint32 smi_blocking   : 1;
-        uint32 nmi_blocking   : 1;
+    struct 
+	{
+        uint32 sti_blocking   : 1;//指示当前有STI阻塞状态
+        uint32 movss_blocking : 1;//指示有MOV-SS阻塞状态
+        uint32 smi_blocking   : 1;//指示有SMI阻塞状态
+        uint32 nmi_blocking   : 1;//指示有NMI阻塞状态
         uint32 reserved       : 28;
     };
     uint64_t pad;
@@ -84,8 +86,8 @@ typedef union interruptibility_state_t interruptibility_state_t;
 
 // Segment descriptor
 struct segment_desc_t {
-    uint16_t selector;
-    uint16_t _dummy;
+    uint16 selector;
+    uint16 _dummy;
     uint32 limit;
     uint64 base;
     union {
@@ -123,7 +125,7 @@ struct vcpu_state_t
 					uint8 _al,
 						_ah;
 				};
-				uint16_t    _ax;
+				uint16    _ax;
 				uint32    _eax;
 				uint64    _rax;
 			};
@@ -134,7 +136,7 @@ struct vcpu_state_t
 					uint8 _cl,
 						_ch;
 				};
-				uint16_t    _cx;
+				uint16    _cx;
 				uint32    _ecx;
 				uint64    _rcx;
 			};
@@ -145,7 +147,7 @@ struct vcpu_state_t
 					uint8 _dl,
 						_dh;
 				};
-				uint16_t    _dx;
+				uint16    _dx;
 				uint32    _edx;
 				uint64    _rdx;
 			};
@@ -156,31 +158,31 @@ struct vcpu_state_t
 					uint8 _bl,
 						_bh;
 				};
-				uint16_t    _bx;
+				uint16    _bx;
 				uint32    _ebx;
 				uint64    _rbx;
 			};
 			union
 			{
-				uint16_t    _sp;
+				uint16    _sp;
 				uint32    _esp;
 				uint64    _rsp;
 			};
 			union
 			{
-				uint16_t    _bp;
+				uint16    _bp;
 				uint32    _ebp;
 				uint64    _rbp;
 			};
 			union
 			{
-				uint16_t    _si;
+				uint16    _si;
 				uint32    _esi;
 				uint64    _rsi;
 			};
 			union
 			{
-				uint16_t    _di;
+				uint16    _di;
 				uint32    _edi;
 				uint64    _rdi;
 			};
@@ -239,8 +241,13 @@ struct vcpu_state_t
 	uint64 _sysenter_eip;
 	uint64 _sysenter_esp;
 
+	//《处理器虚拟化技术》P230
+	//指示虚拟机当前活动状态: 
+	// 0--active 1--HLT 2--shutdown 3--wait-for-SIPI
 	uint32 _activity_state;
 	uint32 pad;
+	//《处理器虚拟化技术》P232
+	//指示虚拟机可中断性: 
 	interruptibility_state_t _interruptibility_state;
 };
 /*
@@ -266,12 +273,12 @@ struct hax_tunnel
 #define HAX_EXIT_IO_OUT 0
             uint8_t _direction;
             uint8_t _df;
-            uint16_t _size;
-            uint16_t _port;
-            uint16_t _count;
+            uint16 _size;
+            uint16 _port;
+            uint16 _count;
             uint8_t _flags;
             uint8_t _pad0;
-            uint16_t _pad1;
+            uint16 _pad1;
             uint32_t _pad2;
             uint64_t _vaddr;
         } pio;
@@ -287,8 +294,8 @@ struct hax_tunnel_info
 {
     uint64_t va;
     uint64_t io_va;
-    uint16_t size;
-    uint16_t pad[3];
+    uint16 size;
+    uint16 pad[3];
 };
 
 /* The exit reason in HAX tunnel for HAX_VCPU_IOCTL_RUN IOCTL */
@@ -401,7 +408,7 @@ struct hax_capabilityinfo
 #define HAX_CAP_STATUS_NOTWORKING  0x0
 #define HAX_CAP_WORKSTATUS_MASK 0x1
 #define HAX_CAP_MEMQUOTA        0x2
-    uint16_t wstatus;
+    uint16 wstatus;
     /*
      * valid when HAXM is not working
      * bit 0: HAXM is not working because VT is not enabeld
@@ -409,7 +416,7 @@ struct hax_capabilityinfo
      */
 #define HAX_CAP_FAILREASON_VT   0x1
 #define HAX_CAP_FAILREASON_NX   0x2
-    uint16_t winfo;
+    uint16 winfo;
     uint32_t pad;
     uint64_t mem_quota;
 };
@@ -422,7 +429,7 @@ struct hax_fastmmio
     uint64_t value;
     uint8_t size;
     uint8_t direction;
-    uint16_t reg_index;
+    uint16 reg_index;
     uint32_t pad0;
     uint64_t _cr0;
     uint64_t _cr2;

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <Windows.h>
+#include <stdint.h>
 #include <DbgHelp.h>
 
 using namespace std;

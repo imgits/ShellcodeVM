@@ -84,16 +84,18 @@
       <MinimalRebuild>false</MinimalRebuild>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <AdditionalIncludeDirectories>E:\GitHub\ShellcodeOS\libc;E:\GitHub\ShellcodeVM\GuestOS;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Native</SubSystem>
       <EntryPointSymbol>main</EntryPointSymbol>
-      <BaseAddress>0x80020000</BaseAddress>
+      <BaseAddress>0x80000000</BaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <Driver>Driver</Driver>
-      <AdditionalDependencies />
+      <AdditionalDependencies>E:\GitHub\ShellcodeOS\Release\oslibc.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalOptions> /filealign:0x1000 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -115,12 +117,13 @@
       <SDLCheck>true</SDLCheck>
       <ExceptionHandling>false</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <AdditionalIncludeDirectories>E:\GitHub\ShellcodeOS\libc;E:\GitHub\ShellcodeVM\GuestOS;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies />
+      <AdditionalDependencies>E:\GitHub\ShellcodeOS\Release\oslibc.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <EntryPointSymbol>main</EntryPointSymbol>
       <BaseAddress>0x80000000</BaseAddress>
@@ -128,7 +131,9 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <SubSystem>Native</SubSystem>
       <Driver>Driver</Driver>
-      <AdditionalOptions> /filealign:0x1000  /Stub:E:/github/shellcodevm/GuestOS/release/boot.exe %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions> /filealign:0x1000 %(AdditionalOptions)</AdditionalOptions>
+      <FixedBaseAddress>false</FixedBaseAddress>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,10 +151,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="gdt.cpp" />
+    <ClCompile Include="idt.cpp" />
     <ClCompile Include="kernel.cpp" />
+    <ClCompile Include="paging.cpp" />
+    <ClCompile Include="Shellcode.cpp" />
+    <ClCompile Include="trap.cpp" />
+    <ClCompile Include="tss.cpp" />
+    <ClCompile Include="video.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="gdt.h" />
+    <ClInclude Include="idt.h" />
     <ClInclude Include="os.h" />
+    <ClInclude Include="paging.h" />
+    <ClInclude Include="Shellcode.h" />
+    <ClInclude Include="trap.h" />
+    <ClInclude Include="tss.h" />
+    <ClInclude Include="video.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

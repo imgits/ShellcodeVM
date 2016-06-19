@@ -84,16 +84,16 @@
       <MinimalRebuild>false</MinimalRebuild>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <AdditionalIncludeDirectories>..\..\ShellcodeOS\libc;..\GuestOS;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\GitHub\ShellcodeOS\libc;E:\GitHub\ShellcodeVM\GuestOS;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>Debug</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Native</SubSystem>
       <EntryPointSymbol>boot_code16</EntryPointSymbol>
-      <BaseAddress>0x00000000</BaseAddress>
+      <BaseAddress>0x0010000</BaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <Driver>Driver</Driver>
-      <AdditionalDependencies>..\..\ShellcodeOS\Debug\oslibc.lib;</AdditionalDependencies>
+      <AdditionalDependencies>E:\GitHub\ShellcodeOS\Release\oslibc.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <AdditionalOptions> /filealign:0x1000 %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -117,16 +117,17 @@
       <SDLCheck>true</SDLCheck>
       <ExceptionHandling>false</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>E:\GitHub\ShellcodeOS\libc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\GitHub\ShellcodeOS\libc;E:\GitHub\ShellcodeVM\GuestOS;</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>E:\GitHub\ShellcodeOS\Release\oslibc.lib;</AdditionalDependencies>
+      <AdditionalDependencies>E:\GitHub\ShellcodeOS\Release\oslibc.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
-      <EntryPointSymbol>main</EntryPointSymbol>
-      <BaseAddress>0x10000</BaseAddress>
+      <EntryPointSymbol>boot_code16</EntryPointSymbol>
+      <BaseAddress>0x0010000</BaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <SubSystem>Native</SubSystem>
@@ -162,17 +163,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gdt.cpp" />
-    <ClCompile Include="idt.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="paging.cpp" />
-    <ClCompile Include="video.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="gdt.h" />
-    <ClInclude Include="idt.h" />
-    <ClInclude Include="paging.h" />
-    <ClInclude Include="video.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -18,9 +18,51 @@
     <ClCompile Include="kernel.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="gdt.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="idt.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="paging.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="video.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tss.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="trap.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Shellcode.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="os.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gdt.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="idt.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="paging.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="video.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tss.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="trap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Shellcode.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
