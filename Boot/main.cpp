@@ -14,7 +14,7 @@ void	init_frame_database()
 	memset((void*)FRAME_DB_PHYSICAL_ADDR, PAGE_USED, SIZE_TO_PAGES(KERNEL_MEM_SIZE));
 }
 
-void     map_pages(uint32_t physical_address, uint32_t virtual_address, uint32_t size, uint32_t protect = PT_PRESENT | PT_WRITABLE)
+void     map_pages(uint32_t physical_address, uint32_t virtual_address, uint32_t size, uint32_t protect = PT_PRESENT | PT_WRITABLE | PT_USER)
 {
 	int pages = SIZE_TO_PAGES(size);
 	for (int i = 0; i < pages; i++)

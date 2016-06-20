@@ -7,7 +7,6 @@
 #define TRAP_WITH_ERROR_CODE(int_no) \
 void __declspec(naked) trap_entry_##int_no()  \
 {  \
-	__asm hlt \
 	__asm cli \
 	/*__asm push -1  错误吗 */ \
 	__asm push		int_no  /*中断向量*/ \
@@ -18,6 +17,11 @@ void __declspec(naked) trap_entry_##int_no()  \
 	__asm push		gs \
 	__asm mov		eax,		esp \
 	__asm push      eax \
+	__asm MOV       ax, SS \
+	__asm MOV       ds, ax \
+	__asm MOV       es, ax \
+	__asm MOV       fs, ax \
+	__asm MOV       gs, ax \
 	__asm call		TRAP::dispatch \
 	__asm pop       eax \
 	__asm pop		gs \
@@ -30,10 +34,17 @@ void __declspec(naked) trap_entry_##int_no()  \
 	__asm iretd \
 }
 
+//__asm mov eax, [esp +0x00] \
+	//__asm mov ebx, [esp +0x04] \
+	//__asm mov ecx, [esp +0x08] \
+	//__asm mov edx, [esp +0x0C] \
+	//__asm mov esi, [esp +0x10] \
+	//__asm mov edi, [esp +0x14] \
+	//__asm hlt 
+
 #define TRAP_NO_ERROR_CODE(int_no) \
 void __declspec(naked) trap_entry_##int_no()  \
 {  \
-	__asm hlt \
 	__asm cli \
 	__asm push -1  /* 错误吗 */ \
 	__asm push		int_no  /*中断向量*/ \
@@ -44,6 +55,11 @@ void __declspec(naked) trap_entry_##int_no()  \
 	__asm push		gs \
 	__asm mov		eax,		esp \
 	__asm push      eax \
+	__asm MOV       ax, SS \
+	__asm MOV       ds, ax \
+	__asm MOV       es, ax \
+	__asm MOV       fs, ax \
+	__asm MOV       gs, ax \
     __asm call		TRAP::dispatch \
 	__asm pop       eax \
 	__asm pop		gs \
@@ -91,15 +107,25 @@ void TRAP::dispatch(TRAP_CONTEXT* context)
 {
 	uint32 _CR2 = 0;
 	uint32 irq_no = context->irq_no;
-	if (irq_no >= MAX_TRAP_ENTRIES)
-	{
-		return;
-	}
-	if (TRAP::m_handlers[irq_no] != NULL)
-	{
-		TRAP::m_handlers[irq_no](context);
-		return;
-	}
+	uint32 _EIP   = context->eip;
+	uint32 _CS =	context->cs;
+	uint32 errcode = context->err_code;
+
+	__asm mov EAX, _EIP
+	__asm mov EBX, _CS
+	__asm mov ECX, irq_no
+	__asm mov EDX, errcode
+	__asm hlt
+
+	//if (irq_no >= MAX_TRAP_ENTRIES)
+	//{
+	//	return;
+	//}
+	//if (TRAP::m_handlers[irq_no] != NULL)
+	//{
+	//	TRAP::m_handlers[irq_no](context);
+	//	return;
+	//}
 	switch (irq_no)
 	{
 	case 0:TRAP::handler0(context);break;
@@ -193,7 +219,6 @@ void TRAP::handler2(TRAP_CONTEXT* context)
 	__asm mov _CR2, eax
 	sprintf(buf, "int_no=%d errorcode=%08X CR2=%08X CS:EIP=%04X:%08X\n", context->irq_no, context->err_code, _CR2, context->cs, context->eip);
 	DBG(buf);
-
 }
 //断点	INT 3
 void TRAP::handler3(TRAP_CONTEXT* context)
@@ -204,8 +229,8 @@ void TRAP::handler3(TRAP_CONTEXT* context)
 	__asm mov _CR2, eax
 	sprintf(buf, "int_no=%d errorcode=%08X CR2=%08X CS:EIP=%04X:%08X\n", context->irq_no, context->err_code, _CR2, context->cs, context->eip);
 	DBG(buf);
-
 }
+
 //溢出中断	INTO
 void TRAP::handler4(TRAP_CONTEXT* context)
 {
@@ -215,8 +240,8 @@ void TRAP::handler4(TRAP_CONTEXT* context)
 	__asm mov _CR2, eax
 	sprintf(buf, "int_no=%d errorcode=%08X CR2=%08X CS:EIP=%04X:%08X\n", context->irq_no, context->err_code, _CR2, context->cs, context->eip);
 	DBG(buf);
-
 }
+
 //边界越界  BOUND
 void TRAP::handler5(TRAP_CONTEXT* context)
 {
@@ -302,8 +327,8 @@ void TRAP::handler12(TRAP_CONTEXT* context)
 	__asm mov _CR2, eax
 	sprintf(buf, "int_no=%d errorcode=%08X CR2=%08X CS:EIP=%04X:%08X\n", context->irq_no, context->err_code, _CR2, context->cs, context->eip);
 	DBG(buf);
-
 }
+
 //常规保护
 void TRAP::handler13(TRAP_CONTEXT* context)
 {
@@ -349,13 +374,14 @@ void TRAP::handler14(TRAP_CONTEXT* context)
 			sprintf(buf, "用户级 读 不存在的页面int_no=%d errorcode=%08X CR2=%08X CS:EIP=%04X:%08X\n", context->irq_no, context->err_code, _CR2, context->cs, context->eip);
 			DBG(buf);
 			break;
+		case 5://用户级 读 违反页面保护权限
+			sprintf(buf, "用户级 读 违反页面保护权限int_no=%d errorcode=%08X CR2=%08X CS:EIP=%04X:%08X\n", context->irq_no, context->err_code, _CR2, context->cs, context->eip);
+			DBG(buf);
+			break;
 		case 6://用户级 写 不存在的页面
 			sprintf(buf, "用户级 写 不存在的页面int_no=%d errorcode=%08X CR2=%08X CS:EIP=%04X:%08X\n", context->irq_no, context->err_code, _CR2, context->cs, context->eip);
 			DBG(buf);
 			break;
-		case 5://用户级 读 违反页面保护权限
-			sprintf(buf, "用户级 读 违反页面保护权限int_no=%d errorcode=%08X CR2=%08X CS:EIP=%04X:%08X\n", context->irq_no, context->err_code, _CR2, context->cs, context->eip);
-			DBG(buf);
 		case 7://用户级 写 违反页面保护权限
 			sprintf(buf, "用户级 写 违反页面保护权限int_no=%d errorcode=%08X CR2=%08X CS:EIP=%04X:%08X\n", context->irq_no, context->err_code, _CR2, context->cs, context->eip);
 			DBG(buf);

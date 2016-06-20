@@ -224,6 +224,10 @@ bool get_msrs(HAXM_CPU* cpu)
 	msrs.entries[19].entry = MSR_LASTBRANCH_TOS;
 	msrs.nr_msr = 20;
 	cpu->get_msrs(&msrs);
+	msrs.entries[4].value |= 2;
+	cpu->set_msrs(&msrs);
+	cpu->get_msrs(&msrs);
+ 
 	return true;
 }
 
@@ -255,7 +259,7 @@ int main(int argc, char *argv[])
 		if (!(cpu = vm->create_cpu())) break;
 		if (!cpu->get_cpu_state()) break;
 		cpu->show_state();
-
+		get_msrs(cpu);
 		cpu->reset(vm_context.boot_start);
 		cpu->show_state();
 		char* dgbinfo = (char*)(vm_context.ram_base + vm_context.video_buf_base);
@@ -307,10 +311,6 @@ int main(int argc, char *argv[])
 				// these situations will continue to the Hax module
 			case HAX_EXIT_INTERRUPT:
 				printf("HAX_EXIT_INTERRUPT\n");
-				if (cpu->m_state._rip == 0x0000000080002F20)
-				{
-					int a = 0;
-				}
 				break;
 			case HAX_EXIT_PAUSED:
 				printf("HAX_EXIT_PAUSED\n");

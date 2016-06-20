@@ -9,6 +9,7 @@
 #include "paging.h"
 #include "video.h"
 #include "Shellcode.h"
+#include "msr-index.h"
 
 GDT		gdt;
 IDT		idt;
@@ -68,6 +69,11 @@ int  main()
 	__asm MOV EBX, 0x22222222
 	__asm MOV ECX, 0x33333333
 	__asm MOV EDX, 0x44444444
+	__asm INT 0
+	__asm MOV EDI, SHELLCODE_BUF_VIRTUAL_ADDR
+	__asm MOV [EDI],EDI
+	__asm MOV EDI, 0x12345678
+	__asm MOV EDX, [EDI]
 	__asm hlt
 	}
 	__asm test_code_end:
@@ -80,7 +86,14 @@ int  main()
 
 	memcpy((byte*)SHELLCODE_BUF_VIRTUAL_ADDR, (void*)test_code_buf, test_code_len);
 
+	__asm MOV ECX, IA32_DEBUGCTL
+	__asm rdmsr
+	__asm OR  EAX, 0x02
+	__asm wrmsr
+	__asm XOR EAX,EAX
+	__asm rdmsr
 	return_to_user_mode();
+	__asm hlt
 	//video.puts("Hello world\n");
 	__asm mov edx,0x44444444
 	__asm mov ecx,0

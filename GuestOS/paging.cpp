@@ -85,14 +85,15 @@ bool     PAGER::identity_paging_lowest_4M()
 	((uint32_t*)m_page_dir)[0] = page_table_0 | PT_PRESENT | PT_WRITABLE;
 	for (int i = 0; i < 1024;i++)
 	{
-		((uint32_t*)page_table_0)[i] = i | PT_PRESENT | PT_WRITABLE;
+		((uint32_t*)page_table_0)[i] = i | PT_PRESENT | PT_WRITABLE | PT_USER;
 	}
 	return true;
 }
 
 void PAGER::map_pages(uint32_t physical_addr, uint32_t virtual_addr, uint32_t size, uint32_t protect)
 {
-	if (USER_SPACE(virtual_addr)) protect |= PT_USER;
+	//if (USER_SPACE(virtual_addr)) 
+	protect |= PT_USER;
 	int pages = SIZE_TO_PAGES(size);
 	for (int i = 0; i < pages; i++)
 	{
